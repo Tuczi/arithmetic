@@ -58,7 +58,7 @@ namespace tuczi
 			proper_interval(const std::string& s): proper_interval<PRECISION>(s.c_str()) { }
 			proper_interval(const std::string& a, const std::string& b): proper_interval<PRECISION>(a.c_str(), b.c_str()) { }
 			
-			virtual ~proper_interval() { delete a; delete b;}//! @todo work with correct = operator
+			virtual ~proper_interval() { delete a; delete b;}
 			
 			point width();
 			
@@ -75,10 +75,14 @@ namespace tuczi
 			template <int _PRECISION>
 			friend std::ostream& operator<<(std::ostream&, proper_interval<_PRECISION>&);
 			
+			template <int _PRECISION>
+			friend const proper_interval<_PRECISION> square(const proper_interval<_PRECISION>&);
+			
+			template <int _PRECISION>
+			friend const proper_interval<_PRECISION> sqrt(const proper_interval<_PRECISION>&);
+			
 			/*!
 			 * @todo
-			friend proper_interval square(const proper_interval&);
-			friend proper_interval sqrt(const proper_interval&);
 			
 			friend proper_interval monotonicallyIncreasingFunction(proper_interval&, point(*)(point)); //! @brief interval extension of monotically increacing function on interval [a,b]
 			friend proper_interval monotonicallyDecreasingFunction(proper_interval&, point(*)(point)); //! @brief interval extension of monotically decreacing function on interval [a,b]
@@ -151,7 +155,8 @@ namespace tuczi
 		return ret;
 	}
 
-	template<int PRECISION> const proper_interval<PRECISION> proper_interval<PRECISION>::operator +(const proper_interval<PRECISION>& inter)
+	template<int PRECISION> 
+	const proper_interval<PRECISION> proper_interval<PRECISION>::operator +(const proper_interval<PRECISION>& inter)
 	{
 		proper_interval<PRECISION> ret;
 		ROUND_DOWN;
@@ -162,7 +167,8 @@ namespace tuczi
 		return ret;
 	}
 
-	template<int PRECISION> const proper_interval<PRECISION> proper_interval<PRECISION>::operator -(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	const proper_interval<PRECISION> proper_interval<PRECISION>::operator -(const proper_interval<PRECISION>& inter)
 	{
 		proper_interval<PRECISION> ret;
 		ROUND_DOWN;
@@ -173,7 +179,8 @@ namespace tuczi
 		return ret;
 	}
 
-	template<int PRECISION> const proper_interval<PRECISION> proper_interval<PRECISION>::operator *(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	const proper_interval<PRECISION> proper_interval<PRECISION>::operator *(const proper_interval<PRECISION>& inter)
 	{
 		mpfr::mpreal::set_default_prec(mpfr::digits2bits(PRECISION));
 		
@@ -199,7 +206,8 @@ namespace tuczi
 		return ret;
 	}
 
-	template<int PRECISION> const proper_interval<PRECISION> proper_interval<PRECISION>::operator /(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	const proper_interval<PRECISION> proper_interval<PRECISION>::operator /(const proper_interval<PRECISION>& inter)
 	{
 		if( *(inter.a) <=0 && *b >= 0) throw dividing_exception<PRECISION>(inter);
 		mpfr::mpreal::set_default_prec(mpfr::digits2bits(PRECISION));
@@ -226,34 +234,62 @@ namespace tuczi
 		return ret;
 	}
 
-	template<int PRECISION> proper_interval<PRECISION>& proper_interval<PRECISION>::operator +=(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	proper_interval<PRECISION>& proper_interval<PRECISION>::operator +=(const proper_interval<PRECISION>& inter)
 	{
 		*this = *this + inter;
 		return *this;
 	}
 
-	template<int PRECISION> proper_interval<PRECISION>& proper_interval<PRECISION>::operator -=(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	proper_interval<PRECISION>& proper_interval<PRECISION>::operator -=(const proper_interval<PRECISION>& inter)
 	{
 		*this = *this - inter;
 		return *this;
 	}
 
-	template<int PRECISION> proper_interval<PRECISION>& proper_interval<PRECISION>::operator *=(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	proper_interval<PRECISION>& proper_interval<PRECISION>::operator *=(const proper_interval<PRECISION>& inter)
 	{
 		*this = *this * inter;
 		return *this;
 	}
 
-	template<int PRECISION> proper_interval<PRECISION>& proper_interval<PRECISION>::operator /=(const proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	proper_interval<PRECISION>& proper_interval<PRECISION>::operator /=(const proper_interval<PRECISION>& inter)
 	{
 		*this = *this / inter;
 		return *this;
 	}
 
-	template<int PRECISION> std::ostream& operator<<(std::ostream& os , proper_interval<PRECISION>& inter)
+	template<int PRECISION>
+	std::ostream& operator<<(std::ostream& os , proper_interval<PRECISION>& inter)
 	{
 		//"%1.17RDe" "%1.17RUe"
 		return os<<"["<<(inter.a)->toString("%1.17Re")<<"; "<<(inter.b)->toString("%1.17Re")<<"], d="<<inter.width().toString("%1.1RUe");
+	}
+	
+	template<int PRECISION>
+	const proper_interval<PRECISION> square(const proper_interval<PRECISION>& inter)
+	{
+		proper_interval<PRECISION> result = inter;
+		result *= inter;
+		if(*result.a < 0)
+			*result.a = 0;
+			
+		return result;
+	}
+	
+	template<int PRECISION>
+	const proper_interval<PRECISION> sqrt(const proper_interval<PRECISION>& inter)
+	{
+		ROUND_DOWN;
+		point p1 = sqrt(*inter.a);
+		ROUND_UP;
+		point p2= sqrt(*inter.b);
+		ROUND_NEAREST;
+		
+		return proper_interval<PRECISION>(p1, p2);
 	}
 
 	

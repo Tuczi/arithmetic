@@ -17,7 +17,11 @@ template <int PRECISION> void make(std::string str1, std::string str2)
 	tmp = interval*interval2;
 	std::cout<<"Operation * : "<<tmp<<"\n";
 	tmp = interval/interval2;
-	std::cout<<"Operation / : "<<tmp<<"\n\n";
+	std::cout<<"Operation / : "<<tmp<<"\n";
+	tmp = sqrt(interval);
+	std::cout<<"Operation sqrt : "<<tmp<<"\n";
+	tmp = square(interval);
+	std::cout<<"Operation square : "<<tmp<<"\n";
 }
  
 int main(int argc, char** argv)
